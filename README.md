@@ -2,8 +2,16 @@
  ---
  ### [demo在线演示](https://dcpnonstop.github.io/baiduSearchSugestion/)
 ## 简单聊聊跨域
-跨域是由同源策略引起的，同源策略/SOP（Same origin policy）是一种约定，由Netscape公司1995年引入浏览器，它是浏览器最核心也最基本的安全功能，如果缺少了同源策略，浏览器很容易受到XSS、CSFR等攻击。所谓同源是指"协议+域名+端口"三者相同，即便两个不同的域名指向同一个ip地址，也非同源。
+跨域问题是由于JavaScript语言安全限制中的同源策略/SOP（Same origin policy）造成的，同源策略是指一段脚本只能读取来自同一来源的窗口和文档的属性,由Netscape公司1995年引入浏览器，它是浏览器最核心也最基本的安全功能，如果缺少了同源策略，浏览器很容易受到XSS、CSFR等攻击。所谓同源是指"协议+域名+端口"三者相同，即便两个不同的域名指向同一个ip地址，也非同源。同源策略保证用户信息安全，防止恶意的网站窃取数据。
 
+一个域名的组成：
+
+ |  http:// |www  |abc.com|:8080|/script/iquire.js|
+ | --------   | -----:   | -----:   | -----:   | :----: |
+ | 协议| 子域名| 主域名| 端口号| 请求资源地址|
+
+当**协议、子域名、主域名、端口号**中任意一个不相同时，都算作不同的域。不同的域之间相互请求资源，属于**跨域**
+<!--more-->
 
 同源策略限制以下几种行为：
 > 1.Cookie、LocalStorage 和 IndexDB 无法读取
@@ -16,7 +24,19 @@
 
 
 同源策略做了很严格的限制，但是在实际的场景中，又确实有很多地方需要突破同源策略的限制，也就是我们常说的跨域。
-跨域的方法有很多（如接下来要玩的jsonp跨域，还有cors跨域资源共享，反向代理等等）。
+
+#### 解决跨域的几种方式
+1.    document.domain + iframe      (只有在主域相同的时候才能使用该方法)。两个网页一级域名相同，二级域名不同，为了共享cookies，可以设置document.domain共享cookie
+2.	 location.hash + iframe 原理是利用location.hash来进行传值。假设域名a.com下的文件cs1.html要和cnblogs.com域名下的cs2.html传递信息。1) cs1.html首先创建自动创建一个隐藏的iframe，iframe的src指向cnblogs.com域名下的cs2.html页面;2) cs2.html响应请求后再将通过修改cs1.html的hash值来传递数据;3) 同时在cs1.html上加一个定时器，隔一段时间来判断location.hash的值有没有变化，一旦有变化则获取获取hash值
+注：由于两个页面不在同一个域下IE、Chrome不允许修改parent.location.hash的值，所以要借助于a.com域名下的一个代理iframe
+
+3.	window.name + iframe 浏览器窗口有window.name属性。这个属性的最大特点是，无论是否同源，只要在同一个窗口里，前一个网页设置了这个属性，后一个网页可以读取它。
+4. postMessage（HTML5中的XMLHttpRequest Level 2中的API）	跨文档通信API（Cross-document messaging）这个API为window对象新增了一个window.postMessage方法，允许跨窗口通信，不论这两个窗口是否同源。
+5.	同源政策规定，AJAX请求只能发给同源的网址，否则就报错，针对该限制：
+JSONP(JSONP是服务器与客户端跨源通信的常用方法它的基本思想是，网页通过添加一个```<script>```元素，向服务器请求JSON数据，这种做法不受同源政策限制；服务器收到请求后，将数据放在一个指定名字的回调函数里传回来), jsonp虽然很简单，但是有如下缺点：1）安全问题(请求代码中可能存在安全隐患)2）要确定jsonp请求是否失败并不容易
+6. websocket(一种通信协议，使用ws://（非加密）和wss://（加密）作为协议前缀。该协议不实行同源政策，只要服务器支持，就可以通过它进行跨源通信),web sockets是一种浏览器的API，它的目标是在一个单独的持久连接上提供全双工、双向通信。(同源策略对web sockets不适用)web sockets原理：在JS创建了web socket之后，会有一个HTTP请求发送到浏览器以发起连接。取得服务器响应后，建立的连接会使用HTTP升级从HTTP协议交换为web sockt协议。
+7. CORS(ORS是跨源资源分享（Cross-Origin Resource Sharing）的缩写。它是W3C标准，是跨源AJAX请求的根本解决方法。相比JSONP只能发GET请求，CORS允许任何类型的请求。)CORS背后的思想，就是使用自定义的HTTP头部让浏览器与服务器进行沟通，从而决定请求或响应是应该成功，还是应该失败。
+
 
 ## 使用jsonp跨域
 
