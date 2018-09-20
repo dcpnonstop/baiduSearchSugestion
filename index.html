@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>百度跨域数据获取</title>
+</head>
+<style>
+    * {
+  margin: 0;
+  padding: 0;
+  }
+  ul {
+    list-style-type: none;
+  }
+  img,
+  input {
+    display: block;
+  }
+  img {
+    width: 270px;
+    height: 129px;
+  }
+  input {
+    width: 540px;
+    height: 30px;
+  }
+  #root {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  #root #lists {
+    display: none;
+    border: 1px solid #000;
+    border-top: 0;
+    width: 540px;
+  }
+  #root #lists ul,
+  #root #lists li {
+    line-height: 25px;
+  }
+  #root #lists li:hover {
+    background: #ccc;
+  }
+</style>
+<body>
+    <div id="root">
+        <img src="./images/bd_logo1.png" alt="">
+        <input type="text" id="text" value="">
+        <div id="lists">
+            <ul></ul>
+        </div>
+    </div>
+    <script>
+      var text = document.querySelector('#text')
+      var lists = document.querySelector('#lists')
+      document.onkeyup = function () {
+        var val = text.value
+        var script = document.createElement('script')
+        if(val ==  ''){
+          lists.style.display = 'none'
+        }
+        script.src = `https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd=${val}&cb=dosomething`;
+        document.body.appendChild(script)
+      }
+      function dosomething (data) {
+        var oUl = document.querySelector('#lists ul')
+        oUl.innerHTML = ''
+        data.s.map(function (html) {
+          var oLi =  document.createElement('li')
+          oLi.innerHTML = html
+          oLi.onclick = function () {
+            window.location.href = `http://www.baidu.com/s?wd=${html}`
+          }
+          oUl.appendChild(oLi)
+        })
+        // console.log(data.s)
+        if(data.s.length != 0){
+          lists.style.display = 'block'
+        }else{
+          lists.style.display = 'none'
+        }
+      };
+    </script>
+</body>
+</html>
